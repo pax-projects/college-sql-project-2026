@@ -1,0 +1,113 @@
+---
+config:
+  look: neo
+  layout: elk
+  theme: redux-color
+---
+erDiagram
+	direction TB
+	SPORT_CATEGORY {
+		int cat_id PK ""  
+		string nom  ""  
+		int parent_cat_id FK ""  
+	}
+
+	USER {
+		int user_id PK ""  
+		string username  ""  
+		string email  ""  
+		date inscription_date  ""  
+		int total_points  ""  
+	}
+
+	FOLLOW {
+		int follower_id PK,FK ""  
+		int followed_id PK,FK ""  
+	}
+
+	BUDDIES {
+		int buddy_id_one PK,FK ""  
+		int budddy_id_two PK,FK ""  
+	}
+
+	USER_BADGE {
+		int id PK,FK ""  
+		int user_id PK,FK ""  
+		date obtained_date  ""  
+	}
+
+	INVITATION {
+		int id PK ""  
+		int inviter_id FK ""  
+		int invited_id FK ""  
+		int challenge_id FK ""  
+		string status  ""  
+		bool is_deleted  "DEFAULT: false"  
+	}
+
+	CHALLENGE {
+		int defi_id PK ""  
+		int owner_id FK "NN"  
+		string title  ""  
+		text description  ""  
+		datetime start_datetime  ""  
+		datetime end_datetime  ""  
+		int type FK ""  
+		string objective_type  ""  
+		float targeted_value  ""  
+		int capacity_max  "null for indiv"  
+	}
+
+	OBJECTIVE_TYPE {
+		int id PK ""  
+	}
+
+	SESSION {
+		int session_id PK ""  
+		datetime debut  ""  
+		datetime fin  ""  
+		float distance  ""  
+		float denivele  ""  
+		float vitesse_moyenne  ""  
+		float vitesse_max  ""  
+	}
+
+	TAGS {
+		int id PK ""  
+		string name  "UQ,NN"  
+		date obtained_date  ""  
+	}
+
+	CHALLENGE_MEMBERS {
+		int user_id FK ""  
+		int challenge_id FK ""  
+		float progression  ""  
+		boolean is_ended  ""  
+	}
+
+	SPORT_CATEGORY}o--o{SPORT_CATEGORY:"sub_class"
+	CHALLENGE_MEMBERS|o--o{CHALLENGE:"has_member"
+	USER}o--o|INVITATION:"inviter/invited"
+	USER}o--o|CHALLENGE_MEMBERS:"participate_to"
+	USER||--o{SESSION:"did"
+	USER}o--||CHALLENGE:"created_by"
+	USER}o--o{USER_BADGE:"has_won"
+	USER}o--|{BUDDIES:"  "
+	INVITATION|o--o{CHALLENGE:"invited_to"
+	FOLLOW}o--o{USER:"followed/follower"
+	SESSION||--o{SPORT_CATEGORY:"of_type"
+	CHALLENGE}|--o{SPORT_CATEGORY:"of_type"
+	SESSION}o--o{TAGS:"represented_by"
+	CHALLENGE}o--o{TAGS:"represented_by"
+	CHALLENGE||--o{OBJECTIVE_TYPE:"  "
+
+	style FOLLOW :::::::::::::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
+	style BUDDIES :stroke-width:4px,stroke-dasharray: 5
+
+	style CHALLENGE_MEMBERS ::::::::::::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
+
+	FOLLOW:::Ash
+	BUDDIES:::Ash
+	CHALLENGE_MEMBERS:::Ash
+
+	classDef Ash :,stroke-width:1px, stroke-dasharray:none, stroke:#999999, fill:#EEEEEE, color:#000000
