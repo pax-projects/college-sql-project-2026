@@ -6,14 +6,8 @@ config:
 ---
 erDiagram
 	direction TB
-	SPORT_CATEGORY {
-		int cat_id PK ""  
-		string nom  ""  
-		int parent_cat_id FK ""  
-	}
-
 	USER {
-		int user_id PK ""  
+	    serial id PK ""  
 		string username  ""  
 		string email  ""  
 		date inscription_date  ""  
@@ -31,13 +25,12 @@ erDiagram
 	}
 
 	USER_BADGE {
-		int id PK,FK ""  
+		serial id PK,FK ""  
 		int user_id PK,FK ""  
 		date obtained_date  ""  
 	}
 
-	INVITATION {
-		int id PK ""  
+	INVITATION { 
 		int inviter_id FK ""  
 		int invited_id FK ""  
 		int challenge_id FK ""  
@@ -45,8 +38,15 @@ erDiagram
 		bool is_deleted  "DEFAULT: false"  
 	}
 
+	CHALLENGE_MEMBERS {
+		int user_id FK ""  
+		int challenge_id FK ""  
+		float progression  ""  
+		boolean is_ended  ""  
+	}
+
 	CHALLENGE {
-		int defi_id PK ""  
+		serial id PK ""  
 		int owner_id FK "NN"  
 		string title  ""  
 		text description  ""  
@@ -58,32 +58,40 @@ erDiagram
 		int capacity_max  "null for indiv"  
 	}
 
-	OBJECTIVE_TYPE {
-		int id PK ""  
-	}
-
 	SESSION {
-		int session_id PK ""  
+		serial id PK ""  
 		datetime debut  ""  
 		datetime fin  ""  
 		float distance  ""  
-		float denivele  ""  
-		float vitesse_moyenne  ""  
-		float vitesse_max  ""  
+		float height_difference  ""  
+		float average_speed  ""
+        float min_speed ""  
+		float max_speed  ""  
 	}
 
-	TAGS {
-		int id PK ""  
+	TAG {
+		serial id PK ""  
 		string name  "UQ,NN"  
 		date obtained_date  ""  
 	}
 
-	CHALLENGE_MEMBERS {
-		int user_id FK ""  
-		int challenge_id FK ""  
-		float progression  ""  
-		boolean is_ended  ""  
+	OBJECTIVE_TYPE {
+		serial id PK ""  
+		varchar name  "NN"  
+		string description  ""  
 	}
+
+	SPORT_CATEGORY {
+		serial id PK ""  
+		string nom  ""  
+		int parent_cat_id FK ""  
+	}
+
+    HASHTAG {
+        serial id PK ""
+        varchar name "NN"
+        string description ""
+    }
 
 	SPORT_CATEGORY}o--o{SPORT_CATEGORY:"sub_class"
 	CHALLENGE_MEMBERS|o--o{CHALLENGE:"has_member"
@@ -97,17 +105,22 @@ erDiagram
 	FOLLOW}o--o{USER:"followed/follower"
 	SESSION||--o{SPORT_CATEGORY:"of_type"
 	CHALLENGE}|--o{SPORT_CATEGORY:"of_type"
-	SESSION}o--o{TAGS:"represented_by"
-	CHALLENGE}o--o{TAGS:"represented_by"
+	SESSION}o--o{TAG:"represented_by"
+	CHALLENGE}o--o{TAG:"represented_by"
 	CHALLENGE||--o{OBJECTIVE_TYPE:"  "
+	TAG}o--||OBJECTIVE_TYPE:"inherit"
+	TAG}o--||SPORT_CATEGORY:"inherit"
+    TAG}o--||HASHTAG:"inherit"
 
-	style FOLLOW :::::::::::::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
-	style BUDDIES :stroke-width:4px,stroke-dasharray: 5
+	style FOLLOW :::::::::::::::::::::::::::::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
+	style BUDDIES :::::::::::::::::stroke-width:4px,stroke-dasharray:5
 
-	style CHALLENGE_MEMBERS ::::::::::::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
+	style INVITATION :stroke-width:4px,stroke-dasharray: 5
+	style CHALLENGE_MEMBERS ::::::::::::::::::::::::::::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
 
 	FOLLOW:::Ash
 	BUDDIES:::Ash
+	INVITATION:::Ash
 	CHALLENGE_MEMBERS:::Ash
 
 	classDef Ash :,stroke-width:1px, stroke-dasharray:none, stroke:#999999, fill:#EEEEEE, color:#000000
