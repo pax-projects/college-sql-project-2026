@@ -7,7 +7,7 @@ config:
 erDiagram
 	direction TB
 	USER {
-	    serial id PK ""  
+		serial id PK ""  
 		string username  ""  
 		string email  ""  
 		date inscription_date  ""  
@@ -30,7 +30,7 @@ erDiagram
 		date obtained_date  ""  
 	}
 
-	INVITATION { 
+	INVITATION {
 		int inviter_id FK ""  
 		int invited_id FK ""  
 		int challenge_id FK ""  
@@ -64,9 +64,28 @@ erDiagram
 		datetime fin  ""  
 		float distance  ""  
 		float height_difference  ""  
-		float average_speed  ""
-        float min_speed ""  
+		float average_speed  ""  
+		float min_speed  ""  
 		float max_speed  ""  
+	}
+
+	DISPOSITIVES {
+		serial id PK ""  
+	}
+
+	DISPOSITIVES_TYPE_1 {
+		serial id PK ""  
+		int vo2_max  ""  
+	}
+
+	DISPOSITIVES_TYPE_2 {
+		serial id PK ""  
+		int datum  ""  
+	}
+
+	DISPOSITIVES_TYPE_3 {
+		serial id PK ""  
+		int datum  ""  
 	}
 
 	TAG {
@@ -87,11 +106,19 @@ erDiagram
 		int parent_cat_id FK ""  
 	}
 
-    HASHTAG {
-        serial id PK ""
-        varchar name "NN"
-        string description ""
-    }
+	HASHTAG {
+		serial id PK ""  
+		varchar name  "NN"  
+		string description  ""  
+	}
+
+	LEVEL {
+		int user_id FK ""  
+		int challenge_creation_level  "DEFAULT 0"  
+		int challenge_done_level  "DEFAULT 0"  
+		int session_done_level  "DEFAULT 0"  
+		int invitation_level  "DEFAULT 0"  
+	}
 
 	SPORT_CATEGORY}o--o{SPORT_CATEGORY:"sub_class"
 	CHALLENGE_MEMBERS|o--o{CHALLENGE:"has_member"
@@ -110,17 +137,23 @@ erDiagram
 	CHALLENGE||--o{OBJECTIVE_TYPE:"  "
 	TAG}o--||OBJECTIVE_TYPE:"inherit"
 	TAG}o--||SPORT_CATEGORY:"inherit"
-    TAG}o--||HASHTAG:"inherit"
+	TAG}o--||HASHTAG:"inherit"
+	LEVEL}o--||USER:"has"
+	SESSION}|--|{DISPOSITIVES:"has"
+	DISPOSITIVES}|--|{DISPOSITIVES_TYPE_1:"  "
+	DISPOSITIVES}|--|{DISPOSITIVES_TYPE_2:"  "
+	DISPOSITIVES}|--|{DISPOSITIVES_TYPE_3:"  "
 
-	style FOLLOW :::::::::::::::::::::::::::::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
-	style BUDDIES :::::::::::::::::stroke-width:4px,stroke-dasharray:5
+	style FOLLOW ::::::::::::::::::::::::::::::::::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
+	style BUDDIES ::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
 
-	style INVITATION :stroke-width:4px,stroke-dasharray: 5
-	style CHALLENGE_MEMBERS ::::::::::::::::::::::::::::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
+	style INVITATION ::::::stroke-width:4px,stroke-dasharray:5
+	style CHALLENGE_MEMBERS :::::::::::::::::::::::::::::::::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
+
+	style LEVEL ::::::stroke-width:4px,stroke-dasharray:5
 
 	FOLLOW:::Ash
 	BUDDIES:::Ash
 	INVITATION:::Ash
 	CHALLENGE_MEMBERS:::Ash
-
-	classDef Ash :,stroke-width:1px, stroke-dasharray:none, stroke:#999999, fill:#EEEEEE, color:#000000
+	LEVEL:::Ash
