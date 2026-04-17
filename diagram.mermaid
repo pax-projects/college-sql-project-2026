@@ -44,7 +44,7 @@ erDiagram
 		float progression  ""  
 		boolean is_ended  ""  
 	}
-
+    
 	CHALLENGE {
 		serial id PK ""  
 		int owner_id FK "NN"  
@@ -69,24 +69,25 @@ erDiagram
 		float max_speed  ""  
 	}
 
-	DISPOSITIVES {
-		serial id PK ""  
-	}
 
-	DISPOSITIVES_TYPE_1 {
-		serial id PK ""  
-		int vo2_max  ""  
-	}
+    DISPOSITIVES {
+        serial id PK ""
+        int user_id FK ""
+        string name ""
+        string brand ""
+        string model ""
+    }
 
-	DISPOSITIVES_TYPE_2 {
-		serial id PK ""  
-		int datum  ""  
-	}
+    CAPABILITY {
+        serial id PK ""
+        string name ""
+        string unit ""
+    }
 
-	DISPOSITIVES_TYPE_3 {
-		serial id PK ""  
-		int datum  ""  
-	}
+    DISPOSITIVE_CAPABILITY {
+        int dispostive_id FK ""
+        int capability_id FK ""
+    }
 
 	TAG {
 		serial id PK ""  
@@ -140,9 +141,10 @@ erDiagram
 	TAG}o--||HASHTAG:"inherit"
 	LEVEL}o--||USER:"has"
 	SESSION}|--|{DISPOSITIVES:"has"
-	DISPOSITIVES}|--|{DISPOSITIVES_TYPE_1:"  "
-	DISPOSITIVES}|--|{DISPOSITIVES_TYPE_2:"  "
-	DISPOSITIVES}|--|{DISPOSITIVES_TYPE_3:"  "
+	DISPOSITIVES}|--|{CAPABILITY:"has"
+    DISPOSITIVES ||--o{ DISPOSITIVE_CAPABILITY : "has"
+    CAPABILITY ||--o{ DISPOSITIVE_CAPABILITY : "supports"
+
 
 	style FOLLOW ::::::::::::::::::::::::::::::::::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
 	style BUDDIES ::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
