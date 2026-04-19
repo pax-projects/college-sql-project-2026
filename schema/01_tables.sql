@@ -23,7 +23,14 @@ CREATE TABLE IF NOT EXISTS followers (
   follower_id       INTEGER NOT NULL,
   followed_id       INTEGER NOT NULL,
 
-  PRIMARY KEY (follower_id, followed_id)
+  PRIMARY KEY (follower_id, followed_id),
+
+  created_by        INTEGER NOT NULL,
+  updated_by        INTEGER NOT NULL,
+  deleted_by        INTEGER,
+  created_at        TIMESTAMP NOT NULL,
+  updated_at        TIMESTAMP NOT NULL,
+  deleted_at        TIMESTAMP
 );
 
 -----------------------------------------------------------
@@ -31,7 +38,14 @@ CREATE TABLE IF NOT EXISTS followers (
 -----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS buddies (
   buddy_one_id      INTEGER NOT NULL,
-  buddy_two_id      INTEGER NOT NULL
+  buddy_two_id      INTEGER NOT NULL,
+
+  created_by        INTEGER NOT NULL,
+  updated_by        INTEGER NOT NULL,
+  deleted_by        INTEGER,
+  created_at        TIMESTAMP NOT NULL,
+  updated_at        TIMESTAMP NOT NULL,
+  deleted_at        TIMESTAMP
 );
 
 -----------------------------------------------------------
@@ -54,6 +68,34 @@ CREATE TABLE IF NOT EXISTS users_badges (
   user_id           INTEGER NOT NULL,
   obtention_date    TIMESTAMP NOT NULL,
 
-  PRIMARY KEY (badge_id, user_id)
+  PRIMARY KEY (badge_id, user_id),
+
+  created_by        INTEGER NOT NULL,
+  updated_by        INTEGER NOT NULL,
+  deleted_by        INTEGER,
+  created_at        TIMESTAMP NOT NULL,
+  updated_at        TIMESTAMP NOT NULL,
+  deleted_at        TIMESTAMP
 );
 
+-----------------------------------------------------------
+-- SESSIONS TABLE
+-----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS sessions (
+  id                SERIAL PRIMARY KEY,
+  user_id           INTEGER NOT NULL,
+  start_datetime    TIMESTAMP NOT NULL,
+  end_datetime      TIMESTAMP NOT NULL,
+  distance          NUMERIC,
+  height_diff       NUMERIC,
+  avg_speed         NUMERIC,
+  min_speed         NUMERIC,
+  max_speed         NUMERIC,
+
+  created_by        INTEGER NOT NULL,
+  updated_by        INTEGER NOT NULL,
+  deleted_by        INTEGER,
+  created_at        TIMESTAMP NOT NULL,
+  updated_at        TIMESTAMP NOT NULL,
+  deleted_at        TIMESTAMP
+);
