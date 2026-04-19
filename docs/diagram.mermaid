@@ -41,7 +41,7 @@ erDiagram
 	CHALLENGE_MEMBERS {
 		int user_id FK ""  
 		int challenge_id FK ""  
-		float progression  ""  
+		float is_completed  ""  
 		boolean is_ended  ""  
 	}
     
@@ -53,10 +53,17 @@ erDiagram
 		datetime start_datetime  ""  
 		datetime end_datetime  ""  
 		int type FK ""  
-		string objective_type  ""  
-		float targeted_value  ""  
 		int capacity_max  "null for indiv"  
 	}
+
+	CHALLENGE_GOAL {
+		serial id PK ""
+		int challenge_id FK "NN"
+		int objective_type_id FK "NN"
+		float targeted_value ""
+		string condition "DEFAULT 'greater_or_equal'"
+	}
+
 
 	SESSION {
 		serial id PK ""  
@@ -98,6 +105,7 @@ erDiagram
 	OBJECTIVE_TYPE {
 		serial id PK ""  
 		varchar name  "NN"  
+		varchar unit "NN"
 		string description  ""  
 	}
 
