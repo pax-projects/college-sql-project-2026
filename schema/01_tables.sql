@@ -1,7 +1,7 @@
 -----------------------------------------------------------
--- USER TABLE
+-- USERS TABLE
 -----------------------------------------------------------
-CREATE TABLE IF NOT EXISTS "user" (
+CREATE TABLE IF NOT EXISTS users (
   id                SERIAL PRIMARY KEY,
   first_name        VARCHAR(50) NOT NULL,
   last_name         VARCHAR(50) NOT NULL,
@@ -17,9 +17,27 @@ CREATE TABLE IF NOT EXISTS "user" (
 );
 
 -----------------------------------------------------------
--- USER BADGE
+-- FOLLOWERS TABLE
 -----------------------------------------------------------
-CREATE TABLE IF NOT EXISTS badge (
+CREATE TABLE IF NOT EXISTS followers (
+  follower_id       INTEGER NOT NULL,
+  followed_id       INTEGER NOT NULL,
+
+  PRIMARY KEY (follower_id, followed_id)
+);
+
+-----------------------------------------------------------
+-- BUDDIES TABLE
+-----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS buddies (
+  buddy_one_id      INTEGER NOT NULL,
+  buddy_two_id      INTEGER NOT NULL
+);
+
+-----------------------------------------------------------
+-- USERS BADGES TABLE
+-----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS badges (
   id                SERIAL PRIMARY KEY,
   name              VARCHAR(50) NOT NULL,
 
@@ -31,10 +49,11 @@ CREATE TABLE IF NOT EXISTS badge (
   deleted_at        TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS user_badge (
-  id                SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS users_badges (
   badge_id          INTEGER NOT NULL,
   user_id           INTEGER NOT NULL,
   obtention_date    TIMESTAMP NOT NULL,
-  UNIQUE (badge_id, user_id)
+
+  PRIMARY KEY (badge_id, user_id)
 );
+
