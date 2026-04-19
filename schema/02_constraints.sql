@@ -85,3 +85,15 @@ CHECK (min_speed <= avg_speed AND avg_speed <= max_speed);  -- Does accept nulls
 ALTER TABLE sessions
 ADD CONSTRAINT chk_start_le_end_datetime
 CHECK (start_datetime < end_datetime);                      -- A session stays at least > 0 seconds
+
+-----------------------------------------------------------
+-- TAGS TABLE
+-----------------------------------------------------------
+ALTER TABLE tags
+ADD CONSTRAINT fk_tag_type
+FOREIGN KEY (tag_type)
+REFERENCES tags_types(id);
+
+ALTER TABLE tags
+ADD CONSTRAINT chk_depth_geq_zero
+CHECK (tag_depth >= 0);
