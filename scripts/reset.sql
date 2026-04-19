@@ -1,0 +1,2 @@
+DROP SCHEMA sql_project_2026 CASCADE;
+CREATE SCHEMA sql_project_2026;
