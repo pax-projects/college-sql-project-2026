@@ -9,10 +9,10 @@ CREATE TABLE IF NOT EXISTS users (
   total_points      INTEGER DEFAULT 0,
 
   created_by        INTEGER NOT NULL,
-  updated_by        INTEGER NOT NULL,
+  updated_by        INTEGER,
   deleted_by        INTEGER,
-  created_at        TIMESTAMP NOT NULL,
-  updated_at        TIMESTAMP NOT NULL,
+  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   deleted_at        TIMESTAMP
 );
 
@@ -56,10 +56,10 @@ CREATE TABLE IF NOT EXISTS badges (
   name              VARCHAR(50) NOT NULL,
 
   created_by        INTEGER NOT NULL,
-  updated_by        INTEGER NOT NULL,
+  updated_by        INTEGER,
   deleted_by        INTEGER,
-  created_at        TIMESTAMP NOT NULL,
-  updated_at        TIMESTAMP NOT NULL,
+  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   deleted_at        TIMESTAMP
 );
 
@@ -97,18 +97,9 @@ CREATE TABLE IF NOT EXISTS sessions (
 -- TAGS TABLE
 -----------------------------------------------------------
 -- TODO: Revoke modification rights
--- WARNING: The next integers are set in data/seed.sql
-CREATE TABLE IF NOT EXISTS tags_types (
-  id                SERIAL PRIMARY KEY,
-  name              VARCHAR(30) UNIQUE NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS tags (
-  id                SERIAL,
-  tag_type          INTEGER NOT NULL,
-  parent_id         INTEGER,
-  tag_depth         INTEGER NOT NULL DEFAULT 0,
-  name              VARCHAR(30) NOT NULL,
+  id                SERIAL PRIMARY KEY,
+  name              VARCHAR(30) UNIQUE NOT NULL,
   description       TEXT,
 
   created_by        INTEGER NOT NULL,
@@ -116,21 +107,57 @@ CREATE TABLE IF NOT EXISTS tags (
   deleted_by        INTEGER,
   created_at        TIMESTAMP NOT NULL,
   updated_at        TIMESTAMP NOT NULL,
-  deleted_at        TIMESTAMP,
+  deleted_at        TIMESTAMP
+);
 
-  PRIMARY KEY (id, tag_type),
-  UNIQUE (name, tag_type)
-) PARTITION BY LIST (tag_type);
+CREATE TABLE IF NOT EXISTS objective_types_tags (
+  unit              VARCHAR(50) NOT NULL,
 
-CREATE TABLE objective_types_tags
-PARTITION OF tags
-FOR VALUES IN (1);
+  PRIMARY KEY (id)
+) INHERITS (tags);
 
-CREATE TABLE hashtags_tags
-PARTITION OF tags
-FOR VALUES IN (2);
+CREATE TABLE IF NOT EXISTS hashtags_tags (
+  PRIMARY KEY (id)
 
-CREATE TABLE sports_categories_tags
-PARTITION OF tags
-FOR VALUES IN (3);
+) INHERITS (tags);
+
+CREATE TABLE IF NOT EXISTS sports_categories_tags (
+  parent_id         INTEGER,
+  tag_depth         INTEGER NOT NULL DEFAULT 0,
+
+  PRIMARY KEY (id)
+) INHERITS (tags);
+
+-----------------------------------------------------------
+-- CHALLENGES TABLE
+-----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS challenges (
+  id                SERIAL PRIMARY KEY,
+  owner_id          INTEGER NOT NULL,
+  title             VARCHAR(255) NOT NULL,
+  description       TEXT,
+
+  start_datetime    TIMESTAMP NOT NULL,
+  end_datetime      TIMESTAMP NOT NULL,
+
+  is_collective     BOOLEAN NOT NULL DEFAULT FALSE,
+  capacity_max      INTEGER,
+ 
+  created_by        INTEGER NOT NULL,
+  updated_by        INTEGER,
+  deleted_by        INTEGER,
+  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at        TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS challenges_goals (
+  id                SERIAL PRIMARY KEY,
+  challenge_id      INTEGER NOT NULL,
+  objective_type_id INTEGER NOT NULL,
+  targeted_value    FLOAT NOT NULL,
+  condition         TEXT NOT NULL DEFAULT 'greater_or_equal',
+
+  UNIQUE (challenge_id, objective_type_id)
+);
 

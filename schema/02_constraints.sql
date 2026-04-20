@@ -89,11 +89,44 @@ CHECK (start_datetime < end_datetime);                      -- A session stays a
 -----------------------------------------------------------
 -- TAGS TABLE
 -----------------------------------------------------------
-ALTER TABLE tags
-ADD CONSTRAINT fk_tag_type
-FOREIGN KEY (tag_type)
-REFERENCES tags_types(id);
-
-ALTER TABLE tags
+ALTER TABLE sports_categories_tags
 ADD CONSTRAINT chk_depth_geq_zero
 CHECK (tag_depth >= 0);
+
+-----------------------------------------------------------
+-- CHALLENGES TABLE
+-----------------------------------------------------------
+ALTER TABLE challenges
+ADD CONSTRAINT fk_owner_user
+FOREIGN KEY (owner_id)
+REFERENCES users(id)
+ON DELETE CASCADE;
+
+ALTER TABLE challenges
+ADD CONSTRAINT chk_challenges_dates
+CHECK (start_datetime < end_datetime);
+
+ALTER TABLE challenges
+ADD CONSTRAINT chk_capacity
+CHECK (
+  (is_collective = FALSE AND capacity_max IS NULL) OR
+  (is_collective = TRUE AND capacity_max IS NOT NULL AND capacity_max > 0)
+);
+
+-- CHALLENGES GOALS TABLE
+ALTER TABLE challenges_goals
+ADD CONSTRAINT fk_challenge_id
+FOREIGN KEY (challenge_id)
+REFERENCES challenges(id)
+ON DELETE CASCADE;
+
+ALTER TABLE challenges_goals
+ADD CONSTRAINT fk_objective_type_id
+FOREIGN KEY (objective_type_id)
+REFERENCES objective_types_tags(id);
+
+ALTER TABLE challenges_goals
+ADD CONSTRAINT chk_goal_condition
+CHECK (condition IN
+  ('greater_than', 'greater_or_equal', 'less_than', 'less_or_equal', 'equal')
+);
