@@ -1,8 +1,8 @@
 -----------------------------------------------------------
 -- TAGS TABLE
 -----------------------------------------------------------
-CREATE TRIGGER trg_set_depth
-  BEFORE INSERT OR UPDATE ON sports_categories_tags
+CREATE OR REPLACE TRIGGER trg_set_depth
+  BEFORE INSERT OR UPDATE ON sports_categories_tags 
   FOR EACH ROW
   EXECUTE FUNCTION set_depth();
 

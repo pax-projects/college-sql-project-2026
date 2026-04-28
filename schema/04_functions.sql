@@ -40,7 +40,6 @@ RETURNS TRIGGER AS $$ -- FIXME: This was missing so not compiling
         WHERE cm.user_id = NEW.user_id
           AND cm.is_ended = FALSE
           AND cm.is_completed = FALSE
-          -- NOTE: Use BETWEEN operator
           AND c.start_datetime <= NEW.debut
           AND c.end_datetime >= NEW.fin
     LOOP
