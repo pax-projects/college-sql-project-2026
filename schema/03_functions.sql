@@ -40,8 +40,8 @@ RETURNS TRIGGER AS $$ -- FIXME: This was missing so not compiling
         WHERE cm.user_id = NEW.user_id
           AND cm.is_ended = FALSE
           AND cm.is_completed = FALSE
-          AND c.start_datetime <= NEW.debut
-          AND c.end_datetime >= NEW.fin
+          AND c.start_datetime <= NEW.start_datetime
+          AND c.end_datetime >= NEW.end_datetime
     LOOP
         all_goals_met := TRUE;
 
@@ -53,25 +53,27 @@ RETURNS TRIGGER AS $$ -- FIXME: This was missing so not compiling
             SELECT SUM(
               CASE
                 WHEN
-                  goal.objective_type_id = (SELECT id FROM objective_type WHERE name = 'distance')
+                  goal.objective_type_id = (SELECT id FROM objective_types_tags WHERE name = 'distance')
                   THEN NEW.distance
                 WHEN
-                  goal.objective_type_id = (SELECT id FROM objective_type WHERE name = 'elevation')
-                  THEN NEW.height_difference
+                  goal.objective_type_id = (SELECT id FROM objective_types_tags WHERE name = 'elevation')
+                  THEN NEW.height_diff
                   -- NOTE: That's cool mate !!!
                   -- so when we add a new objective_type we need to handle it
                   -- here
                 ELSE 0
               END
             ) INTO achieved
-            FROM session s
+            FROM sessions s
             WHERE s.user_id = NEW.user_id
-              AND s.debut >= (SELECT start_datetime FROM challenges WHERE id = chal.challenge_id)
-              AND s.fin   <= (SELECT end_datetime FROM challenges WHERE id = chal.challenge_id);
+              AND s.start_datetime >= (SELECT start_datetime FROM challenges WHERE id = chal.challenge_id)
+              AND s.end_datetime   <= (SELECT end_datetime FROM challenges WHERE id = chal.challenge_id);
 
             IF (goal.condition = 'greater_or_equal' AND achieved < goal.targeted_value)   OR
                (goal.condition = 'greater_than'     AND achieved <= goal.targeted_value)  OR
                (goal.condition = 'less_or_equal'    AND achieved > goal.targeted_value)   OR
+               (goal.condition = 'less_than'        AND achieved >= goal.targeted_value)  OR
+               (goal.condition = 'equal'            AND achieved <> goal.targeted_value)
             THEN
                 all_goals_met := FALSE;
                 EXIT;
@@ -92,4 +94,3 @@ RETURNS TRIGGER AS $$ -- FIXME: This was missing so not compiling
     RETURN NEW;
   END;
 $$ LANGUAGE plpgsql;
-
