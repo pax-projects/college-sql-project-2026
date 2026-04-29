@@ -55,11 +55,11 @@ CREATE TABLE IF NOT EXISTS buddies (
   buddy_one_id      INTEGER NOT NULL,
   buddy_two_id      INTEGER NOT NULL,
 
-  created_by        INTEGER NOT NULL,
-  updated_by        INTEGER NOT NULL,
+  created_by        INTEGER,
+  updated_by        INTEGER,
   deleted_by        INTEGER,
-  created_at        TIMESTAMP NOT NULL,
-  updated_at        TIMESTAMP NOT NULL,
+  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   deleted_at        TIMESTAMP,
 
   CONSTRAINT fk_buddy_one_user FOREIGN KEY (buddy_one_id) REFERENCES users(id),

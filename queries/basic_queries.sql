@@ -30,3 +30,19 @@ WHERE
 DELETE FROM users
 WHERE
   email = 'jean-paul.sartre@email.com';
+
+-----------------------------------------------------------
+-- BUDDIES TABLE
+-----------------------------------------------------------
+-- CREATE :
+INSERT INTO followers (follower_id, followed_id)
+VALUES (1, 2);
+
+SELECT * FROM followers;
+
+INSERT INTO followers (follower_id, followed_id)
+VALUES (2, 1);
+
+SELECT * FROM followers;
+
+SELECT * FROM buddies;
