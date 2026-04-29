@@ -5,17 +5,27 @@ CREATE TABLE IF NOT EXISTS users (
   id                SERIAL PRIMARY KEY,
   first_name        VARCHAR(50) NOT NULL,
   last_name         VARCHAR(50) NOT NULL,
-  email             VARCHAR(256) NOT NULL,
+  email             VARCHAR(256) UNIQUE NOT NULL,
   total_points      INTEGER DEFAULT 0,
 
-  created_by        INTEGER NOT NULL,
+  created_by        INTEGER,
   updated_by        INTEGER,
   deleted_by        INTEGER,
-  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   deleted_at        TIMESTAMP,
 
-  CONSTRAINT fk_user_self FOREIGN KEY (id) REFERENCES users(id)
+  CONSTRAINT fk_users_created_by
+    FOREIGN KEY (created_by)
+    REFERENCES users(id),
+
+  CONSTRAINT fk_users_updated_by
+    FOREIGN KEY (updated_by)
+    REFERENCES users(id),
+
+  CONSTRAINT fk_users_deleted_by
+    FOREIGN KEY (deleted_by)
+    REFERENCES users(id)
 );
 
 -----------------------------------------------------------
@@ -27,11 +37,11 @@ CREATE TABLE IF NOT EXISTS followers (
 
   PRIMARY KEY (follower_id, followed_id),
 
-  created_by        INTEGER NOT NULL,
-  updated_by        INTEGER NOT NULL,
+  created_by        INTEGER,
+  updated_by        INTEGER,
   deleted_by        INTEGER,
-  created_at        TIMESTAMP NOT NULL,
-  updated_at        TIMESTAMP NOT NULL,
+  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   deleted_at        TIMESTAMP,
 
   CONSTRAINT fk_follower_user FOREIGN KEY (follower_id) REFERENCES users(id),

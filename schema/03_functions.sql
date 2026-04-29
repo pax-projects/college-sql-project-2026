@@ -25,7 +25,7 @@ $$ LANGUAGE plpgsql;
 -- CHALLENGE TABLE
 -----------------------------------------------------------
 CREATE OR REPLACE FUNCTION check_challenges_completion()
-RETURNS TRIGGER AS $$ -- FIXME: This was missing so not compiling
+RETURNS TRIGGER AS $$
   DECLARE
     -- NOTE: Use complete names not abreviation (we're not payed per char lol (we are not paid at all... :( ))
     chal record;
