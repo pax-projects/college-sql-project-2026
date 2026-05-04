@@ -2,37 +2,22 @@
 -- Asked queries
 -----------------------------------------------------------
 -- One request using at least three tables :
--- Get all the average levels of all buddies of specific user
--- SELECT
---   challenge_creation_level,
---   challenge_done_level,
---   session_done_level,
---   invitation_level
--- FROM levels
--- JOIN buddies ON
---   buddies.buddy_one_id = levels.user_id
--- JOIN users ON
---   buddies.buddy_two_id = users.id
---
--- UNION
---
--- SELECT
---   challenge_creation_level,
---   challenge_done_level,
---   session_done_level,
---   invitation_level
--- FROM levels
--- JOIN buddies ON
---   buddies.buddy_two_id = levels.user_id
--- JOIN users ON
---   buddies.buddy_one_id = users.id;
---
--- SELECT AVG(levels.challenge_creation_level)
--- FROM users
--- JOIN buddies ON
---   buddies.buddy_one_id = users.id OR
---   buddies.buddy_two_id = users.id
--- JOIN levels ON
+-- Get the average levels of all users buddies
+WITH normalized AS (
+  SELECT buddy_one_id AS user_id, buddy_two_id AS friend_id FROM buddies
+  UNION ALL
+  SELECT buddy_two_id AS user_id, buddy_one_id AS friend_id FROM buddies
+)
+SELECT
+  u.id,
+  AVG(l.challenge_creation_level) AS avg_creation,
+  AVG(l.challenge_done_level)     AS avg_done,
+  AVG(l.session_done_level)       AS avg_session,
+  AVG(l.invitation_level)         AS avg_invitation
+FROM users u
+LEFT JOIN normalized n ON n.user_id = u.id
+LEFT JOIN levels l ON l.user_id = n.friend_id
+GROUP BY u.id;
 
 -----------------------------------------------------------
 -- SELF-JOINED QUERY
@@ -133,13 +118,14 @@ SELECT
   COUNT(s.id) AS session_count
 FROM users u
 LEFT JOIN sessions s ON
-  all_sessions.user_id = u.id
+  s.user_id = u.id
 GROUP BY u.id;
 
 -----------------------------------------------------------
 -- TWO QUERIES USING TOTALITY CONDITIONS
 -----------------------------------------------------------
 -- Correlated sub query
+-- FIXME:
 SELECT u.id
 FROM users u
 WHERE EXISTS (
@@ -155,3 +141,35 @@ JOIN sessions s ON
   s.user_id = u.id
 GROUP BY u.id
 HAVING COUNT(s.id) > 0;
+
+-----------------------------------------------------------
+-- NULL DEPENDANT QUERIES
+-----------------------------------------------------------
+
+-----------------------------------------------------------
+-- RECURSIVE QUERIES
+-----------------------------------------------------------
+WITH RECURSIVE two_users_linked(buddy_one_id, buddy_two_id) AS (
+  -- base : direct links
+  SELECT
+    buddy_one_id,
+    buddy_two_id
+  FROM buddies
+
+  UNION
+
+  -- recursion : propagation
+  SELECT
+    l.buddy_one_id,
+    b.buddy_two_id
+  FROM
+    two_users_linked l
+  JOIN buddies b ON
+    l.buddy_two_id = b.buddy_one_id
+)
+SELECT EXISTS (
+  SELECT 1
+  FROM two_users_linked
+  WHERE buddy_one_id = 1
+    AND buddy_two_id = 2
+);
