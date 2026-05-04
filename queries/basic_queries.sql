@@ -1,5 +1,5 @@
 -----------------------------------------------------------
--- USERS TABLE
+-- Simple CRUD on users table
 -----------------------------------------------------------
 -- CREATE :
 INSERT INTO users (first_name, last_name, email)
@@ -32,17 +32,38 @@ WHERE
   email = 'jean-paul.sartre@email.com';
 
 -----------------------------------------------------------
--- BUDDIES TABLE
+-- Asked queries
 -----------------------------------------------------------
--- CREATE :
-INSERT INTO followers (follower_id, followed_id)
-VALUES (1, 2);
+-- One request using at least three tables :
+-- Get all the average levels of all buddies of specific user
+SELECT
+  challenge_creation_level,
+  challenge_done_level,
+  session_done_level,
+  invitation_level
+FROM levels
+JOIN buddies ON
+  buddies.buddy_one_id = levels.user_id
+JOIN users ON
+  buddies.buddy_two_id = users.id
 
-SELECT * FROM followers;
+UNION
 
-INSERT INTO followers (follower_id, followed_id)
-VALUES (2, 1);
+SELECT
+  challenge_creation_level,
+  challenge_done_level,
+  session_done_level,
+  invitation_level
+FROM levels
+JOIN buddies ON
+  buddies.buddy_two_id = levels.user_id
+JOIN users ON
+  buddies.buddy_one_id = users.id;
 
-SELECT * FROM followers;
-
-SELECT * FROM buddies;
+SELECT AVG(levels.challenge_creation_level)
+FROM users
+JOIN buddies ON
+  buddies.buddy_one_id = users.id OR
+  buddies.buddy_two_id = users.id
+JOIN levels ON
+  

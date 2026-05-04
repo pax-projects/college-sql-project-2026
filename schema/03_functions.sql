@@ -15,7 +15,8 @@ RETURNS TRIGGER AS $$
       DELETE FROM followers
       WHERE
         follower_id = NEW.followed_id AND
-        followed_id = NEW.follower_id;
+        followed_id = NEW.follower_id AND
+        deketed_at IS NULL;
 
       -- We add the row to the buddies table
       INSERT INTO buddies (buddy_one_id, buddy_two_id)

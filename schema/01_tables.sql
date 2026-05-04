@@ -86,6 +86,13 @@ CREATE TABLE IF NOT EXISTS users_badges (
   user_id           INTEGER NOT NULL,
   obtention_date    TIMESTAMP NOT NULL,
 
+  created_by        INTEGER NOT NULL,
+  updated_by        INTEGER,
+  deleted_by        INTEGER,
+  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at        TIMESTAMP,
+
   PRIMARY KEY (badge_id, user_id),
 
   CONSTRAINT fk_badge FOREIGN KEY (badge_id) REFERENCES badges(id),
