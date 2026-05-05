@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS buddies (
 
   CONSTRAINT fk_buddy_one_user FOREIGN KEY (buddy_one_id) REFERENCES users(id),
   CONSTRAINT fk_buddy_two_user FOREIGN KEY (buddy_two_id) REFERENCES users(id),
-  CONSTRAINT chk_one_id_neq_two_id CHECK (buddy_one_id != buddy_two_id);
+  CONSTRAINT chk_one_id_neq_two_id CHECK (buddy_one_id != buddy_two_id)
 );
 
 -----------------------------------------------------------
