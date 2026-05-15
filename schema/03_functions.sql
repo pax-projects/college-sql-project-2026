@@ -1,4 +1,33 @@
 -----------------------------------------------------------
+-- FOLLOWERS TABLE
+-----------------------------------------------------------
+CREATE OR REPLACE FUNCTION move_to_buddies_if_reciprocal_followers()
+RETURNS TRIGGER AS $$
+  BEGIN
+    IF EXISTS (
+      SELECT follower_id, followed_id
+      FROM followers
+      WHERE
+        follower_id = NEW.followed_id AND
+        followed_id = NEW.follower_id
+    ) THEN
+      -- We delete the follower row
+      DELETE FROM followers
+      WHERE
+        follower_id = NEW.followed_id AND
+        followed_id = NEW.follower_id AND
+        deketed_at IS NULL;
+
+      -- We add the row to the buddies table
+      INSERT INTO buddies (buddy_one_id, buddy_two_id)
+      VALUES (NEW.follower_id, NEW.followed_id);
+    END IF;
+
+    RETURN NEW;
+  END;
+$$ LANGUAGE plpgsql;
+
+-----------------------------------------------------------
 -- TAGS TABLE
 -----------------------------------------------------------
 CREATE OR REPLACE FUNCTION set_depth()
@@ -25,9 +54,8 @@ $$ LANGUAGE plpgsql;
 -- CHALLENGE TABLE
 -----------------------------------------------------------
 CREATE OR REPLACE FUNCTION check_challenges_completion()
-RETURNS TRIGGER AS $$ -- FIXME: This was missing so not compiling
+RETURNS TRIGGER AS $$
   DECLARE
-    -- NOTE: Use complete names not abreviation (we're not payed per char lol (we are not paid at all... :( ))
     chal record;
     goal record;
     achieved float;
