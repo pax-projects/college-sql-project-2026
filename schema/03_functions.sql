@@ -5,22 +5,25 @@ CREATE OR REPLACE FUNCTION move_to_buddies_if_reciprocal_followers()
 RETURNS TRIGGER AS $$
   BEGIN
     IF EXISTS (
-      SELECT follower_id, followed_id
+      SELECT 1
       FROM followers
       WHERE
         follower_id = NEW.followed_id AND
-        followed_id = NEW.follower_id
+        followed_id = NEW.follower_id AND
+        deleted_at IS NULL
     ) THEN
       -- We delete the follower row
       DELETE FROM followers
       WHERE
         follower_id = NEW.followed_id AND
         followed_id = NEW.follower_id AND
-        deketed_at IS NULL;
+        deleted_at IS NULL;
 
       -- We add the row to the buddies table
       INSERT INTO buddies (buddy_one_id, buddy_two_id)
       VALUES (NEW.follower_id, NEW.followed_id);
+
+      RETURN NULL;
     END IF;
 
     RETURN NEW;
