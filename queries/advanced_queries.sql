@@ -124,27 +124,54 @@ GROUP BY u.id;
 -----------------------------------------------------------
 -- TWO QUERIES USING TOTALITY CONDITIONS
 -----------------------------------------------------------
+-- Goal: users whose every session is at least 5 km long
 -- Correlated sub query
--- FIXME:
-SELECT u.id
-FROM users u
-WHERE EXISTS (
-  SELECT 1
-  FROM sessions s
-  WHERE s.user_id = u.id
+select u.id
+from users u
+where exists (
+  select 1
+  from sessions s
+  where s.user_id = u.id
+)
+and not exists (
+  select 1
+  from sessions s
+  where s.user_id = u.id
+    and s.distance < 5000
 );
 
 -- Aggregation
-SELECT u.id
-FROM users u
-JOIN sessions s ON
-  s.user_id = u.id
-GROUP BY u.id
-HAVING COUNT(s.id) > 0;
+select s.user_id
+from sessions s
+group by s.user_id
+having min(s.distance) >= 5000;
 
 -----------------------------------------------------------
 -- NULL DEPENDANT QUERIES
 -----------------------------------------------------------
+-- users who have never deleted another user
+-- Not in form (breaks when deleted_by contains nulls)
+select u.id
+from users u
+where u.id not in (
+  select deleted_by from users
+);
+
+-- Not exists form (handles nulls correctly)
+select u.id
+from users u
+where not exists (
+  select 1
+  from users u2
+  where u2.deleted_by = u.id
+);
+
+-- Fix for the first
+select u.id
+from users u
+where u.id not in (
+  select deleted_by from users where deleted_by is not null
+);
 
 -----------------------------------------------------------
 -- RECURSIVE QUERIES
@@ -173,3 +200,91 @@ SELECT EXISTS (
   WHERE buddy_one_id = 1
     AND buddy_two_id = 2
 );
+
+-----------------------------------------------------------
+-- WINDOW FUNCTION
+-----------------------------------------------------------
+-- for each user, top 3 longest sessions in the last 90 days
+select user_id, session_id, distance, start_datetime, dist_rank
+from (
+  select
+    s.id as session_id,
+    s.user_id,
+    s.distance,
+    s.start_datetime,
+    row_number() over (
+      partition by s.user_id
+      order by s.distance desc nulls last
+    ) as dist_rank
+  from sessions s
+  where s.start_datetime >= current_date - interval '90 days'
+    and s.deleted_at is null
+) ranked
+where dist_rank <= 3
+order by user_id, dist_rank;
+
+-----------------------------------------------------------
+-- TOP 5 CHALLENGES BY PARTICIPATION
+-----------------------------------------------------------
+-- most popular ongoing or upcoming challenges
+select c.id, c.title, count(cm.user_id) as member_count
+from challenges c
+left join challenge_members cm on cm.challenge_id = c.id
+where c.end_datetime >= current_timestamp
+  and c.deleted_at is null
+group by c.id, c.title
+order by member_count desc
+limit 5;
+
+-----------------------------------------------------------
+-- USERS RANKED BY TOTAL XP
+-----------------------------------------------------------
+-- leaderboard from the levels table
+select
+  u.id,
+  u.first_name,
+  u.last_name,
+  l.challenge_creation_level
+    + l.challenge_done_level
+    + l.session_done_level
+    + l.invitation_level as total_xp
+from users u
+join levels l on l.user_id = u.id
+where u.deleted_at is null
+order by total_xp desc
+limit 10;
+
+-----------------------------------------------------------
+-- FRIEND-OF-FRIEND SUGGESTIONS
+-----------------------------------------------------------
+-- buddies of buddies who are not already direct buddies
+with normalized as (
+  select buddy_one_id as u1, buddy_two_id as u2 from buddies
+  union all
+  select buddy_two_id, buddy_one_id from buddies
+)
+select distinct n1.u1 as user_id, n2.u2 as suggested
+from normalized n1
+join normalized n2 on n2.u1 = n1.u2
+where n2.u2 <> n1.u1
+  and not exists (
+    select 1 from normalized n3
+    where n3.u1 = n1.u1 and n3.u2 = n2.u2
+  );
+
+-----------------------------------------------------------
+-- SPORT CATEGORY DESCENDANTS
+-----------------------------------------------------------
+-- all sub-categories of a given root (e.g. cyclisme -> vtt -> enduro)
+with recursive descendants as (
+  select id, name, parent_id, tag_depth
+  from sports_categories_tags
+  where name = 'cyclisme'
+
+  union all
+
+  select c.id, c.name, c.parent_id, c.tag_depth
+  from sports_categories_tags c
+  join descendants d on c.parent_id = d.id
+)
+select * from descendants;
