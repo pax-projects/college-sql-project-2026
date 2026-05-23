@@ -108,7 +108,7 @@ FROM (
     MAX(distance) AS max_distance
   FROM sessions
   GROUP BY user_id
-);
+) per_user;
 
 -----------------------------------------------------------
 -- QUERY USING EXTERNALS JOIN
