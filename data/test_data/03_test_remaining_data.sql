@@ -265,7 +265,92 @@ begin
 end $$;
 
 -----------------------------------------------------------
--- LEVELS (one row per active user)
+-- SESSION MEASUREMENTS
+-----------------------------------------------------------
+do $$
+declare
+  i integer;
+  sid integer;
+  cap_id integer;
+  cap_name text;
+  val numeric;
+begin
+  for i in 1..800 loop
+    select id into sid from sessions order by random() limit 1;
+    select id, name into cap_id, cap_name from capabilities order by random() limit 1;
+
+    val := case cap_name
+      when 'heart rate'  then (random() * 80 + 80)::numeric(10,2)
+      when 'cadence'     then (random() * 100)::numeric(10,2)
+      when 'temperature' then (random() * 35 - 5)::numeric(10,2)
+      when 'barometer'   then (random() * 100 + 950)::numeric(10,2)
+      when 'power meter' then (random() * 400 + 50)::numeric(10,2)
+      else null
+    end;
+
+    if val is not null then
+      insert into session_measurements (session_id, capability_id, value)
+      values (sid, cap_id, val)
+      on conflict do nothing;
+    end if;
+  end loop;
+end $$;
+
+-----------------------------------------------------------
+-- SESSION HASHTAGS
+-----------------------------------------------------------
+do $$
+declare
+  i integer;
+  sid integer;
+  hid integer;
+begin
+  for i in 1..600 loop
+    select id into sid from sessions order by random() limit 1;
+    select id into hid from hashtags_tags order by random() limit 1;
+    insert into session_hashtags (session_id, hashtag_id)
+    values (sid, hid) on conflict do nothing;
+  end loop;
+end $$;
+
+-----------------------------------------------------------
+-- CHALLENGE HASHTAGS
+-----------------------------------------------------------
+do $$
+declare
+  c record;
+  j integer;
+  hid integer;
+begin
+  for c in select id from challenges loop
+    for j in 1..((random() * 3)::int + 1) loop
+      select id into hid from hashtags_tags order by random() limit 1;
+      insert into challenge_hashtags (challenge_id, hashtag_id)
+      values (c.id, hid) on conflict do nothing;
+    end loop;
+  end loop;
+end $$;
+
+-----------------------------------------------------------
+-- CHALLENGE CATEGORIES
+-----------------------------------------------------------
+do $$
+declare
+  c record;
+  j integer;
+  sc_id integer;
+begin
+  for c in select id from challenges loop
+    for j in 1..((random() * 2)::int + 1) loop
+      select id into sc_id from sports_categories_tags order by random() limit 1;
+      insert into challenge_categories (challenge_id, sport_category_id)
+      values (c.id, sc_id) on conflict do nothing;
+    end loop;
+  end loop;
+end $$;
+
+-----------------------------------------------------------
+-- LEVELS
 -----------------------------------------------------------
 insert into levels (user_id, challenge_creation_level, challenge_done_level, session_done_level, invitation_level)
 select id,

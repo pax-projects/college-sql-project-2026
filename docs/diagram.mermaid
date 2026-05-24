@@ -4,166 +4,144 @@ config:
   layout: elk
   theme: redux-color
 ---
-erDiagram
+classDiagram
 	direction TB
-	USER {
-		serial id PK ""  
-		string username  ""  
-		string email  ""  
-		date inscription_date  ""  
-		int total_points  ""  
+
+	class USER {
+		serial id
+		string username
+		string email
+		date inscription_date
+		int total_points
 	}
 
-	FOLLOW {
-		int follower_id PK,FK ""  
-		int followed_id PK,FK ""  
+	class FOLLOW { }
+
+	class BUDDIES { }
+
+	class BADGE {
+		serial id
+		string name
 	}
 
-	BUDDIES {
-		int buddy_id_one PK,FK ""  
-		int budddy_id_two PK,FK ""  
+	class USER_BADGE {
+		date obtained_date
 	}
 
-	USER_BADGE {
-		serial id PK,FK ""  
-		int user_id PK,FK ""  
-		date obtained_date  ""  
+	class INVITATION {
+		string status
+		bool is_deleted
 	}
 
-	INVITATION {
-		int inviter_id FK ""  
-		int invited_id FK ""  
-		int challenge_id FK ""  
-		string status  ""  
-		bool is_deleted  "DEFAULT: false"  
+	class CHALLENGE_MEMBERS {
+		bool is_completed
+		bool is_ended
+		datetime completed_at
 	}
 
-	CHALLENGE_MEMBERS {
-		int user_id FK ""  
-		int challenge_id FK ""  
-		float is_completed  ""  
-		boolean is_ended  ""  
-	}
-    
-	CHALLENGE {
-		serial id PK ""  
-		int owner_id FK "NN"  
-		string title  ""  
-		text description  ""  
-		datetime start_datetime  ""  
-		datetime end_datetime  ""  
-		int type FK ""  
-		int capacity_max  "null for indiv"  
+	class CHALLENGE {
+		serial id
+		string title
+		text description
+		datetime start_datetime
+		datetime end_datetime
+		bool is_collective
+		int capacity_max
 	}
 
-	CHALLENGE_GOAL {
-		serial id PK ""
-		int challenge_id FK "NN"
-		int objective_type_id FK "NN"
-		float targeted_value ""
-		string condition "DEFAULT 'greater_or_equal'"
+	class CHALLENGE_GOAL {
+		serial id
+		float targeted_value
+		string condition
 	}
 
-
-	SESSION {
-		serial id PK ""  
-		datetime debut  ""  
-		datetime fin  ""  
-		float distance  ""  
-		float height_difference  ""  
-		float average_speed  ""  
-		float min_speed  ""  
-		float max_speed  ""  
+	class SESSION {
+		serial id
+		datetime debut
+		datetime fin
+		float distance
+		float height_difference
+		float average_speed
+		float min_speed
+		float max_speed
 	}
 
-
-    DISPOSITIVES {
-        serial id PK ""
-        int user_id FK ""
-        string name ""
-        string brand ""
-        string model ""
-    }
-
-    CAPABILITY {
-        serial id PK ""
-        string name ""
-        string unit ""
-    }
-
-    DISPOSITIVE_CAPABILITY {
-        int dispostive_id FK ""
-        int capability_id FK ""
-    }
-
-	TAG {
-		serial id PK ""  
-		string name  "UQ,NN"  
-		date obtained_date  ""  
+	class SESSION_MEASUREMENT {
+		numeric value
 	}
 
-	OBJECTIVE_TYPE {
-		serial id PK ""  
-		varchar name  "NN"  
-		varchar unit "NN"
-		string description  ""  
+	class DISPOSITIVE {
+		serial id
+		string name
+		string brand
+		string model
 	}
 
-	SPORT_CATEGORY {
-		serial id PK ""  
-		string nom  ""  
-		int parent_cat_id FK ""  
+	class CAPABILITY {
+		serial id
+		string name
+		string unit
 	}
 
-	HASHTAG {
-		serial id PK ""  
-		varchar name  "NN"  
-		string description  ""  
+	class DISPOSITIVE_CAPABILITY { }
+
+	class TAG {
+		serial id
+		string name
+		text description
 	}
 
-	LEVEL {
-		int user_id FK ""  
-		int challenge_creation_level  "DEFAULT 0"  
-		int challenge_done_level  "DEFAULT 0"  
-		int session_done_level  "DEFAULT 0"  
-		int invitation_level  "DEFAULT 0"  
+	class OBJECTIVE_TYPE {
+		varchar unit
 	}
 
-	SPORT_CATEGORY}o--o{SPORT_CATEGORY:"sub_class"
-	CHALLENGE_MEMBERS|o--o{CHALLENGE:"has_member"
-	USER}o--o|INVITATION:"inviter/invited"
-	USER}o--o|CHALLENGE_MEMBERS:"participate_to"
-	USER||--o{SESSION:"did"
-	USER}o--||CHALLENGE:"created_by"
-	USER}o--o{USER_BADGE:"has_won"
-	USER}o--|{BUDDIES:"  "
-	INVITATION|o--o{CHALLENGE:"invited_to"
-	FOLLOW}o--o{USER:"followed/follower"
-	SESSION||--o{SPORT_CATEGORY:"of_type"
-	CHALLENGE}|--o{SPORT_CATEGORY:"of_type"
-	SESSION}o--o{TAG:"represented_by"
-	CHALLENGE}o--o{TAG:"represented_by"
-	CHALLENGE||--o{OBJECTIVE_TYPE:"  "
-	TAG}o--||OBJECTIVE_TYPE:"inherit"
-	TAG}o--||SPORT_CATEGORY:"inherit"
-	TAG}o--||HASHTAG:"inherit"
-	LEVEL}o--||USER:"has"
-	SESSION}|--|{DISPOSITIVES:"has"
-	DISPOSITIVES}|--|{CAPABILITY:"has"
-    DISPOSITIVES ||--o{ DISPOSITIVE_CAPABILITY : "has"
-    CAPABILITY ||--o{ DISPOSITIVE_CAPABILITY : "supports"
+	class SPORT_CATEGORY {
+		string name
+	}
 
+	class HASHTAG { }
 
-	style FOLLOW ::::::::::::::::::::::::::::::::::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
-	style BUDDIES ::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
+	class LEVEL {
+		int challenge_creation_level
+		int challenge_done_level
+		int session_done_level
+		int invitation_level
+	}
 
-	style INVITATION ::::::stroke-width:4px,stroke-dasharray:5
-	style CHALLENGE_MEMBERS :::::::::::::::::::::::::::::::::::::::::::::::::::::stroke-width:4px,stroke-dasharray:5
+	USER "0,N" -- "1,1" FOLLOW : follower
+	USER "0,N" -- "1,1" FOLLOW : followed
+	USER "0,N" -- "1,1" BUDDIES : buddy_one
+	USER "0,N" -- "1,1" BUDDIES : buddy_two
 
-	style LEVEL ::::::stroke-width:4px,stroke-dasharray:5
+	USER "0,N" -- "1,1" SESSION : performs
+	SPORT_CATEGORY "0,N" -- "1,1" SESSION : of_type
+	SESSION "0,N" -- "1,1" SESSION_MEASUREMENT : has
+	CAPABILITY "0,N" -- "1,1" SESSION_MEASUREMENT : of
+	SESSION "0,N" -- "0,N" HASHTAG : tagged_with
 
-	FOLLOW:::Ash
-	BUDDIES:::Ash
-	INVITATION:::Ash
-	CHALLENGE_MEMBERS:::Ash
-	LEVEL:::Ash
+	USER "0,N" -- "1,1" CHALLENGE : creates
+	CHALLENGE "1,N" -- "1,1" CHALLENGE_GOAL : has
+	OBJECTIVE_TYPE "0,N" -- "1,1" CHALLENGE_GOAL : targets
+	CHALLENGE "1,N" -- "1,1" CHALLENGE_MEMBERS : has_member
+	USER "0,N" -- "1,1" CHALLENGE_MEMBERS : joins
+	CHALLENGE "1,N" -- "0,N" SPORT_CATEGORY : eligible_for
+	CHALLENGE "0,N" -- "0,N" HASHTAG : tagged_with
+
+	USER "0,N" -- "1,1" INVITATION : sends
+	USER "0,N" -- "1,1" INVITATION : receives
+	CHALLENGE "0,N" -- "1,1" INVITATION : for
+
+	USER "0,N" -- "1,1" USER_BADGE : earned
+	BADGE "0,N" -- "1,1" USER_BADGE : given_to
+	USER "1,1" -- "1,1" LEVEL : has
+
+	USER "0,N" -- "1,1" DISPOSITIVE : owns
+	DISPOSITIVE "0,N" -- "1,1" DISPOSITIVE_CAPABILITY : supports
+	CAPABILITY "0,N" -- "1,1" DISPOSITIVE_CAPABILITY : in
+
+	SPORT_CATEGORY "0,1" -- "0,N" SPORT_CATEGORY : parent_of
+
+	TAG <|-- OBJECTIVE_TYPE
+	TAG <|-- SPORT_CATEGORY
+	TAG <|-- HASHTAG
+

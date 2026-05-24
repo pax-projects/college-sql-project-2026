@@ -1,2 +1,3 @@
-DROP SCHEMA sql_project_2026 CASCADE;
-CREATE SCHEMA sql_project_2026;
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+GRANT ALL ON SCHEMA public TO public;

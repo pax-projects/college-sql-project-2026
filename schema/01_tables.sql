@@ -291,6 +291,61 @@ CREATE TABLE IF NOT EXISTS dispositives_capabilities (
 );
 
 -----------------------------------------------------------
+-- SESSION HASHTAGS TABLE
+-----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS session_hashtags (
+  session_id        INTEGER NOT NULL,
+  hashtag_id        INTEGER NOT NULL,
+
+  PRIMARY KEY (session_id, hashtag_id),
+
+  CONSTRAINT fk_sh_session FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE,
+  CONSTRAINT fk_sh_hashtag FOREIGN KEY (hashtag_id) REFERENCES hashtags_tags(id)
+);
+
+-----------------------------------------------------------
+-- CHALLENGE HASHTAGS TABLE
+-----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS challenge_hashtags (
+  challenge_id      INTEGER NOT NULL,
+  hashtag_id        INTEGER NOT NULL,
+
+  PRIMARY KEY (challenge_id, hashtag_id),
+
+  CONSTRAINT fk_ch_challenge FOREIGN KEY (challenge_id) REFERENCES challenges(id) ON DELETE CASCADE,
+  CONSTRAINT fk_ch_hashtag   FOREIGN KEY (hashtag_id)   REFERENCES hashtags_tags(id)
+);
+
+-----------------------------------------------------------
+-- CHALLENGE CATEGORIES TABLE
+-----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS challenge_categories (
+  challenge_id      INTEGER NOT NULL,
+  sport_category_id INTEGER NOT NULL,
+
+  PRIMARY KEY (challenge_id, sport_category_id),
+
+  CONSTRAINT fk_cc_challenge FOREIGN KEY (challenge_id)      REFERENCES challenges(id) ON DELETE CASCADE,
+  CONSTRAINT fk_cc_category  FOREIGN KEY (sport_category_id) REFERENCES sports_categories_tags(id)
+);
+
+-----------------------------------------------------------
+-- SESSION MEASUREMENTS TABLE
+-- Stores the optional "selon les dispositifs" data
+-- (HR, cadence, calories, temperature, ...).
+-----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS session_measurements (
+  session_id        INTEGER NOT NULL,
+  capability_id     INTEGER NOT NULL,
+  value             NUMERIC NOT NULL,
+
+  PRIMARY KEY (session_id, capability_id),
+
+  CONSTRAINT fk_sm_session    FOREIGN KEY (session_id)    REFERENCES sessions(id) ON DELETE CASCADE,
+  CONSTRAINT fk_sm_capability FOREIGN KEY (capability_id) REFERENCES capabilities(id)
+);
+
+-----------------------------------------------------------
 -- LEVELS TABLE
 -----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS levels (
