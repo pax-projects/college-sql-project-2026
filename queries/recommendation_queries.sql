@@ -11,11 +11,10 @@ with
   ),
   scored as (
     select
-      cv.entity_id                            as challenge_id,
-      sum(u.value * cv.value)                 as dot,
-      sqrt(sum(u.value * u.value))            as norm_u,
-      sqrt(sum(cv.value * cv.value))          as norm_c,
-      sqrt(sum(power(u.value - cv.value, 2))) as distance
+      cv.entity_id                   as challenge_id,
+      sum(u.value * cv.value)        as dot,
+      sqrt(sum(u.value * u.value))   as norm_u,
+      sqrt(sum(cv.value * cv.value)) as norm_c
     from u
     join vectors cv
       on cv.entity_type = 'challenge'
@@ -25,9 +24,7 @@ with
 select
   ch.id,
   ch.title,
-  round((dot / nullif(norm_u * norm_c, 0))::numeric, 4) as cosine,
-  round(degrees(acos(greatest(-1, least(1, dot / nullif(norm_u * norm_c, 0)))))::numeric, 1) as angle_deg,
-  round(s.distance::numeric, 4) as distance
+  round((dot / nullif(norm_u * norm_c, 0))::numeric, 4) as cosine
 from scored s
 join challenges ch on ch.id = s.challenge_id
 where ch.end_datetime >= current_timestamp
@@ -54,11 +51,10 @@ with
   ),
   scored as (
     select
-      cv.entity_id                            as challenge_id,
-      sum(u.value * cv.value)                 as dot,
-      sqrt(sum(u.value * u.value))            as norm_u,
-      sqrt(sum(cv.value * cv.value))          as norm_c,
-      sqrt(sum(power(u.value - cv.value, 2))) as distance
+      cv.entity_id                   as challenge_id,
+      sum(u.value * cv.value)        as dot,
+      sqrt(sum(u.value * u.value))   as norm_u,
+      sqrt(sum(cv.value * cv.value)) as norm_c
     from u
     join vectors cv
       on cv.entity_type = 'challenge'
@@ -68,9 +64,7 @@ with
 select
   ch.id,
   ch.title,
-  round((dot / nullif(norm_u * norm_c, 0))::numeric, 4) as cosine,
-  round(degrees(acos(greatest(-1, least(1, dot / nullif(norm_u * norm_c, 0)))))::numeric, 1) as angle_deg,
-  round(s.distance::numeric, 4) as distance
+  round((dot / nullif(norm_u * norm_c, 0))::numeric, 4) as cosine
 from scored s
 join challenges ch on ch.id = s.challenge_id
 where ch.end_datetime >= current_timestamp
