@@ -1,7 +1,7 @@
 -----------------------------------------------------------
 -- RAW VECTOR VALUES
 -----------------------------------------------------------
--- User affinity per category: number of joined challenges eligible for it
+-- fill users table
 update vectors v
 set value = sub.cnt
 from (
@@ -14,7 +14,7 @@ where v.entity_type = 'user'
   and v.entity_id = sub.user_id
   and v.category_id = sub.sport_category_id;
 
--- Challenge eligibility per category
+-- fill the challenges part
 update vectors v
 set value = 1
 from challenge_categories cc

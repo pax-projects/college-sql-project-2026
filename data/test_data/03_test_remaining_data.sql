@@ -114,8 +114,12 @@ declare
   n integer;
 begin
   for c in select id, owner_id, is_collective, capacity_max from challenges loop
-    insert into challenge_members (user_id, challenge_id) values (c.owner_id, c.id)
-    on conflict do nothing;
+    begin
+      insert into challenge_members (user_id, challenge_id) values (c.owner_id, c.id)
+      on conflict do nothing;
+    exception when others then
+      null;
+    end;
 
     if c.is_collective then
       n := least(coalesce(c.capacity_max, 5) - 1, (random() * 8)::int);
@@ -125,8 +129,12 @@ begin
 
     for j in 1..n loop
       select id into uid from users where deleted_at is null and id <> c.owner_id order by random() limit 1;
-      insert into challenge_members (user_id, challenge_id) values (uid, c.id)
-      on conflict do nothing;
+      begin
+        insert into challenge_members (user_id, challenge_id) values (uid, c.id)
+        on conflict do nothing;
+      exception when others then
+        null;
+      end;
     end loop;
   end loop;
 end $$;

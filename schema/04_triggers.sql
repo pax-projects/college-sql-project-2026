@@ -38,7 +38,15 @@ CREATE OR REPLACE TRIGGER trg_set_depth
   FOR EACH ROW
   EXECUTE FUNCTION set_depth();
 
-CREATE OR REPLACE TRIGGER check_challenges_completion 
+CREATE OR REPLACE TRIGGER check_challenges_completion
   AFTER INSERT ON sessions
   FOR EACH ROW
   EXECUTE FUNCTION check_challenges_completion();
+
+-----------------------------------------------------------
+-- CHALLENGE MEMBERS TABLE
+-----------------------------------------------------------
+CREATE OR REPLACE TRIGGER trg_enforce_weekly_challenge_limit
+  BEFORE INSERT ON challenge_members
+  FOR EACH ROW
+  EXECUTE FUNCTION enforce_weekly_challenge_limit();

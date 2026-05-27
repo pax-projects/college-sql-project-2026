@@ -231,3 +231,32 @@ RETURNS VOID AS $$
       AND v.category_id = s.category_id;
   END;
 $$ LANGUAGE plpgsql;
+
+-----------------------------------------------------------
+-- WEEKLY CHALLENGE LIMIT
+-----------------------------------------------------------
+CREATE OR REPLACE FUNCTION enforce_weekly_challenge_limit()
+RETURNS TRIGGER AS $$
+  DECLARE
+    week_start DATE;
+    cnt INTEGER;
+  BEGIN
+    SELECT date_trunc('week', start_datetime)::date INTO week_start
+    FROM challenges
+    WHERE id = NEW.challenge_id;
+
+    SELECT COUNT(*) INTO cnt
+    FROM challenge_members cm
+    JOIN challenges c ON c.id = cm.challenge_id
+    WHERE cm.user_id = NEW.user_id
+      AND date_trunc('week', c.start_datetime)::date = week_start;
+
+    IF cnt >= 3 THEN
+      RAISE EXCEPTION
+        'Weekly limit reached: user % already in 3 challenges for week %',
+        NEW.user_id, week_start;
+    END IF;
+
+    RETURN NEW;
+  END;
+$$ LANGUAGE plpgsql;

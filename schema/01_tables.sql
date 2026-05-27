@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 -----------------------------------------------------------
 -- TAGS TABLE
 -----------------------------------------------------------
--- TODO: Revoke modification rights
+
 CREATE TABLE IF NOT EXISTS tags (
   id                SERIAL PRIMARY KEY,
   name              VARCHAR(30) UNIQUE NOT NULL,

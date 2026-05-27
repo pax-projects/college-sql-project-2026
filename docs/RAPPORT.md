@@ -245,14 +245,15 @@ Elles sont garanties directement par PostgreSQL :
 - **Contraintes `UNIQUE`** : `users.email`, `tags.name`, et l'unicité d'un objectif par défi
   (`UNIQUE(challenge_id, objective_type_id)`).
 - **`DEFAULT`** : `total_points = 0`, `is_collective = FALSE`, horodatages, etc.
+- **Limite de trois défis par semaine** : assurée par un trigger
+  (`enforce_weekly_challenge_limit`) qui refuse d'inscrire un utilisateur à un quatrième défi
+  démarrant dans la même semaine ISO (la création comptant aussi, le créateur étant membre).
 
 ### 2. Contraintes d'application
 
 Certaines règles ne sont pas (ou pas raisonnablement) exprimables avec les seuls outils vus en
 cours, et relèvent donc de la couche applicative :
 
-- **« Un utilisateur ne peut créer ni participer à plus de trois défis par semaine »** : règle
-  temporelle glissante, non triviale à exprimer par une contrainte déclarative.
 - **« Le créateur d'un défi est automatiquement participant »** : assuré côté application (et lors
   du peuplage) plutôt que par une contrainte stricte.
 - **Capacité d'un défi collectif** : la colonne `capacity_max` est contrôlée, mais l'interdiction
@@ -495,6 +496,10 @@ USING (deleted_at IS NULL)
 WITH CHECK (deleted_at IS NULL)
 ```
 
+Chaque table concernée active explicitement la sécurité au niveau ligne
+(`ALTER TABLE … ENABLE ROW LEVEL SECURITY`), condition nécessaire pour que les politiques soient
+réellement appliquées.
+
 L'objectif est de garantir que les données marquées comme supprimées (*soft delete*) ne soient
 jamais visibles ni modifiables par les requêtes applicatives classiques, renforçant la cohérence du
 modèle de suppression logique. Certaines tables (`challenge_members`, `capabilities`, `levels`,
@@ -621,20 +626,17 @@ demande pour un couple (utilisateur, défi).
 
 ## A. Limites du projet
 
-- **RLS non activée.** Les politiques sont définies mais `ROW LEVEL SECURITY` n'est pas explicitement
-  activée sur les tables (`ALTER TABLE … ENABLE ROW LEVEL SECURITY`) ; les politiques ne sont donc
-  pas encore appliquées. C'est une amélioration immédiate à apporter.
-- **Visibilité du profil** (public / buddies / masqué) non modélisée.
-- **Règles temporelles** non implémentées au niveau SGBD : limite de trois défis par semaine,
-  créateur automatiquement participant, capacité maximale réellement bloquante.
-- **Catégorie des séances** : les séances ne sont pas directement reliées à une catégorie sportive ;
-  l'affinité utilisateur est dérivée des catégories des défis rejoints.
-- **Hiérarchie et recommandation** : le vecteur d'un défi ne propage pas (encore) l'appartenance le
-  long de la hiérarchie des catégories (un défi « VTT » ne contribue pas automatiquement à
-  « Cyclisme »).
-- **Démarrage à froid** (*cold start*) : un utilisateur sans activité a un vecteur nul et ne peut
-  pas recevoir de recommandation pertinente.
-- **`buddies` sans clé primaire** : l'unicité de la paire n'est pas garantie structurellement.
+Les principales limites concernent l'algorithme de recommandation, qui ouvre des pistes
+d'amélioration ambitieuses dépassant le cadre strict du sujet :
+
+- **Hiérarchie dans les vecteurs** : le vecteur d'un défi ne propage pas son appartenance le long de
+  la hiérarchie des catégories (un défi « VTT » ne contribue pas automatiquement à « Cyclisme »).
+  L'intégrer demanderait une agrégation récursive des dimensions du vecteur.
+- **Démarrage à froid** (*cold start*) : un utilisateur sans historique possède un vecteur nul ; il
+  faudrait un mécanisme de repli (popularité globale, préférences déclarées) pour le recommander.
+- **Signaux collaboratifs et de progression** : l'indice pourrait être enrichi par les défis
+  complétés par les buddies et par la progression récente de l'utilisateur (moyennes mensuelles),
+  comme évoqué dans le sujet — vers un véritable filtrage collaboratif multi-critères.
 
 ## B. Points forts du projet
 
@@ -661,7 +663,7 @@ Le modèle a été pensé pour évoluer sans réécriture lourde :
   (puissance, SpO₂…) sans toucher à la table `sessions`.
 - Le partitionnement de `vectors` prépare la montée en charge.
 
-Les évolutions futures naturelles incluent : l'activation effective de la RLS, la modélisation de la
-visibilité du profil, la prise en compte de la hiérarchie dans les vecteurs, et l'enrichissement de
-l'indice de recommandation par des signaux sociaux (défis complétés par les *buddies*) et de
-progression (moyennes mensuelles), comme suggéré par la consigne.
+Les évolutions futures naturelles incluent : la modélisation de la visibilité du profil, la prise en
+compte de la hiérarchie dans les vecteurs, et l'enrichissement de l'indice de recommandation par des
+signaux sociaux (défis complétés par les *buddies*) et de progression (moyennes mensuelles), comme
+suggéré par la consigne.

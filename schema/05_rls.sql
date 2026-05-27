@@ -195,3 +195,25 @@ ON levels
 FOR ALL
 USING (TRUE)
 WITH CHECK (TRUE);
+
+-----------------------------------------------------------
+-- ENABLE ROW LEVEL SECURITY
+-----------------------------------------------------------
+ALTER TABLE users                     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE followers                 ENABLE ROW LEVEL SECURITY;
+ALTER TABLE buddies                   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users_badges              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE badges                    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sessions                  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tags                      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE objective_types_tags      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hashtags_tags             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sports_categories_tags    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE challenges                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE invitations               ENABLE ROW LEVEL SECURITY;
+ALTER TABLE dispositives              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE challenges_goals          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE challenge_members         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE capabilities              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE dispositives_capabilities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE levels                    ENABLE ROW LEVEL SECURITY;
