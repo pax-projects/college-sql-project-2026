@@ -10,7 +10,7 @@ CREATE OR REPLACE TRIGGER trg_add_vectors_to_users_vectors
 -- CHALLENGE TABLE
 -----------------------------------------------------------
 CREATE OR REPLACE TRIGGER trg_add_vectors_to_challenges_vectors
-  AFTER INSERT ON users
+  AFTER INSERT ON challenges
   FOR EACH ROW
   EXECUTE FUNCTION add_vectors_on_new_challenge();
 
