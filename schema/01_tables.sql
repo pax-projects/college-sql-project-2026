@@ -357,3 +357,25 @@ CREATE TABLE IF NOT EXISTS levels (
 
   CONSTRAINT fk_level_user FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+-----------------------------------------------------------
+-- Vectors ------------------------------------------------
+-----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS users_vectors (
+  user_id           INTEGER NOT NULL,
+  category_id       INTEGER NOT NULL,
+  value             FLOAT DEFAULT 0 NOT NULL,
+
+  PRIMARY KEY (user_id, category_id),
+
+  CONSTRAINT fk_users_vectors_users
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_users_vectors_category
+    FOREIGN KEY (category_id)
+    REFERENCES sports_categories_tags(id)
+    ON DELETE CASCADE
+);
+

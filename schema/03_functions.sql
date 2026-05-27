@@ -1,4 +1,36 @@
 -----------------------------------------------------------
+-- USERS TABLE
+-----------------------------------------------------------
+CREATE OR REPLACE FUNCTION add_vectors_on_new_user()
+RETURNS TRIGGER AS $$
+  BEGIN
+    INSERT INTO users_vectors (user_id, category_id)
+    SELECT
+      NEW.id,
+      sports_categories_tags.id
+    FROM sports_categories_tags;
+
+    RETURN NEW;
+  END;
+$$ LANGUAGE plpgsql;
+
+-----------------------------------------------------------
+-- SPORTS CATEGORY TAGS TABLE
+-----------------------------------------------------------
+CREATE OR REPLACE FUNCTION add_vector_on_new_sport_category()
+RETURNS TRIGGER AS $$
+  BEGIN
+    INSERT INTO users_vectors (user_id, category_id)
+    SELECT
+      users.id,
+      NEW.id
+    FROM users;
+
+    RETURN NEW;
+  END;
+$$ LANGUAGE plpgsql;
+
+-----------------------------------------------------------
 -- FOLLOWERS TABLE
 -----------------------------------------------------------
 CREATE OR REPLACE FUNCTION move_to_buddies_if_reciprocal_followers()
@@ -125,3 +157,64 @@ RETURNS TRIGGER AS $$
     RETURN NEW;
   END;
 $$ LANGUAGE plpgsql;
+
+-----------------------------------------------------------
+-- SOFTMAX Calculus
+-----------------------------------------------------------
+CREATE OR REPLACE FUNCTION calculate_vector_softmax(
+  p_table REGCLASS,
+  p_owner_id INTEGER
+)
+RETURNS VOID AS $$
+  DECLARE
+    temperature CONSTANT FLOAT := 1.0;
+  BEGIN
+    EXECUTE format(
+      '
+      WITH
+        softmaxed AS (
+          SELECT
+            category_id,
+            2 * (
+              EXP(value / %L) /
+              SUM(EXP(value / %L)) OVER ()
+            ) - 1 AS new_value
+          FROM %s
+          WHERE user_id = $1
+        ),
+
+        softmax_avg AS (
+          SELECT AVG(new_value)
+          FROM softmaxed
+        ),
+
+        centered_softmax AS (
+          SELECT
+            category_id,
+            value - softmax_avg
+          FROM softmaxed
+        ),
+
+        vector_norm AS (
+          SELECT
+            SQRT(SUM(POWER(new_value, 2))) AS norm
+          FROM centered_softmax
+        )
+      UPDATE %s v
+      SET value = s.new_value / vn.norm
+      FROM
+        softmaxed s,
+        vector_norm vn
+      WHERE
+        v.user_id = $1
+        AND v.category_id = s.category_id
+      ',
+      temperature,
+      temperature,
+      p_table,
+      p_table
+    )
+    USING p_owner_id;
+  END;
+$$ LANGUAGE plpgsql;
+
