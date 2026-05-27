@@ -7,6 +7,14 @@ CREATE OR REPLACE TRIGGER trg_add_vectors_to_users_vectors
   EXECUTE FUNCTION add_vectors_on_new_user();
 
 -----------------------------------------------------------
+-- CHALLENGE TABLE
+-----------------------------------------------------------
+CREATE OR REPLACE TRIGGER trg_add_vectors_to_challenges_vectors
+  AFTER INSERT ON users
+  FOR EACH ROW
+  EXECUTE FUNCTION add_vectors_on_new_challenge();
+
+-----------------------------------------------------------
 -- SPORTS CATEGORY TAGS TABLE
 -----------------------------------------------------------
 CREATE OR REPLACE TRIGGER trg_add_vector_on_new_sport_category

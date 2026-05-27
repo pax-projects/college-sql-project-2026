@@ -4,10 +4,11 @@
 CREATE OR REPLACE FUNCTION add_vectors_on_new_user()
 RETURNS TRIGGER AS $$
   BEGIN
-    INSERT INTO users_vectors (user_id, category_id)
+    INSERT INTO vectors (entity_type, entity_id, category_id)
     SELECT
+      'user',
       NEW.id,
-      sports_categories_tags.id
+      id
     FROM sports_categories_tags;
 
     RETURN NEW;
@@ -20,11 +21,19 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION add_vector_on_new_sport_category()
 RETURNS TRIGGER AS $$
   BEGIN
-    INSERT INTO users_vectors (user_id, category_id)
+    INSERT INTO vectors (entity_type, entity_id, category_id)
     SELECT
-      users.id,
+      'user',
+      id,
       NEW.id
     FROM users;
+
+    INSERT INTO vectors (entity_type, entity_id, category_id)
+    SELECT
+      'challenge',
+      id,
+      NEW.id
+    FROM challenges;
 
     RETURN NEW;
   END;
@@ -158,63 +167,67 @@ RETURNS TRIGGER AS $$
   END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION add_vectors_on_new_challenge()
+RETURNS TRIGGER AS $$
+  BEGIN
+    INSERT INTO vectors (entity_type, entity_id, category_id)
+    SELECT
+      'challenge',
+      NEW.id,
+      id
+    FROM sports_categories_tags;
+
+    RETURN NEW;
+  END;
+$$ LANGUAGE plpgsql;
+
 -----------------------------------------------------------
 -- SOFTMAX Calculus
 -----------------------------------------------------------
 CREATE OR REPLACE FUNCTION calculate_vector_softmax(
-  p_table REGCLASS,
-  p_owner_id INTEGER
+  p_owner_id INTEGER,
+  p_entity_type TEXT
 )
 RETURNS VOID AS $$
   DECLARE
     temperature CONSTANT FLOAT := 1.0;
   BEGIN
-    EXECUTE format(
-      '
-      WITH
-        softmaxed AS (
-          SELECT
-            category_id,
-            2 * (
-              EXP(value / %L) /
-              SUM(EXP(value / %L)) OVER ()
-            ) - 1 AS new_value
-          FROM %s
-          WHERE user_id = $1
-        ),
+    UPDATE vectors v
+    SET value = s.final_value
+    FROM (
+      WITH softmaxed AS (
+        SELECT
+          category_id,
+          2 * (
+            EXP(value / temperature) /
+            SUM(EXP(value / temperature)) OVER ()
+          ) - 1 AS new_value
+        FROM vectors
+        WHERE entity_type = p_entity_type
+          AND entity_id = p_owner_id
+      ),
 
-        softmax_avg AS (
-          SELECT AVG(new_value)
-          FROM softmaxed
-        ),
+      centered AS (
+        SELECT
+          category_id,
+          new_value - (SELECT AVG(new_value) FROM softmaxed) AS centered_value
+        FROM softmaxed
+      ),
 
-        centered_softmax AS (
-          SELECT
-            category_id,
-            value - softmax_avg
-          FROM softmaxed
-        ),
+      norm AS (
+        SELECT
+          SQRT(SUM(POWER(centered_value, 2))) AS n
+        FROM centered
+      )
 
-        vector_norm AS (
-          SELECT
-            SQRT(SUM(POWER(new_value, 2))) AS norm
-          FROM centered_softmax
-        )
-      UPDATE %s v
-      SET value = s.new_value / vn.norm
-      FROM
-        softmaxed s,
-        vector_norm vn
-      WHERE
-        v.user_id = $1
-        AND v.category_id = s.category_id
-      ',
-      temperature,
-      temperature,
-      p_table,
-      p_table
-    )
-    USING p_owner_id;
+      SELECT
+        category_id,
+        centered_value / COALESCE((SELECT n FROM norm), 1) AS final_value
+      FROM centered
+    ) s
+    WHERE
+      v.entity_type = p_entity_type
+      AND v.entity_id = p_owner_id
+      AND v.category_id = s.category_id;
   END;
 $$ LANGUAGE plpgsql;
-

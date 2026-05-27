@@ -361,21 +361,20 @@ CREATE TABLE IF NOT EXISTS levels (
 -----------------------------------------------------------
 -- Vectors ------------------------------------------------
 -----------------------------------------------------------
-CREATE TABLE IF NOT EXISTS users_vectors (
-  user_id           INTEGER NOT NULL,
-  category_id       INTEGER NOT NULL,
-  value             FLOAT DEFAULT 0 NOT NULL,
+CREATE TABLE vectors (
+  entity_type TEXT NOT NULL,
+  entity_id   INTEGER NOT NULL,
+  category_id INTEGER NOT NULL,
+  value       FLOAT DEFAULT 0 NOT NULL,
 
-  PRIMARY KEY (user_id, category_id),
+  PRIMARY KEY (entity_type, entity_id, category_id)
+) PARTITION BY LIST (entity_type);
 
-  CONSTRAINT fk_users_vectors_users
-    FOREIGN KEY (user_id)
-    REFERENCES users(id)
-    ON DELETE CASCADE,
+CREATE TABLE users_vectors
+PARTITION OF vectors
+FOR VALUES IN ('user');
 
-  CONSTRAINT fk_users_vectors_category
-    FOREIGN KEY (category_id)
-    REFERENCES sports_categories_tags(id)
-    ON DELETE CASCADE
-);
+CREATE TABLE challenges_vectors
+PARTITION OF vectors
+FOR VALUES IN ('challenge');
 
