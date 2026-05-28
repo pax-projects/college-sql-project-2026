@@ -129,12 +129,12 @@ GROUP BY u.id;
 select u.id
 from users u
 where exists (
-  select 1
+  select *
   from sessions s
   where s.user_id = u.id
 )
 and not exists (
-  select 1
+  select *
   from sessions s
   where s.user_id = u.id
     and s.distance < 5000
@@ -161,7 +161,7 @@ where u.id not in (
 select u.id
 from users u
 where not exists (
-  select 1
+  select *
   from users u2
   where u2.deleted_by = u.id
 );
@@ -195,7 +195,7 @@ WITH RECURSIVE two_users_linked(buddy_one_id, buddy_two_id) AS (
     l.buddy_two_id = b.buddy_one_id
 )
 SELECT EXISTS (
-  SELECT 1
+  SELECT *
   FROM two_users_linked
   WHERE buddy_one_id = 1
     AND buddy_two_id = 2
@@ -268,7 +268,7 @@ from normalized n1
 join normalized n2 on n2.u1 = n1.u2
 where n2.u2 <> n1.u1
   and not exists (
-    select 1 from normalized n3
+    select * from normalized n3
     where n3.u1 = n1.u1 and n3.u2 = n2.u2
   );
 

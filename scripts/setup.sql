@@ -1,3 +1,5 @@
+SET search_path TO sql_project_2026;
+
 \i ./schema/01_tables.sql
 \i ./schema/02_indexes.sql
 \i ./schema/03_functions.sql
